@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graffiti Gazetteer</title>
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+    <!-- Custom CSS -->
+    <style>
+        .filter-section {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .filter-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #495057;
+        }
+
+        .result-card {
+            margin-bottom: 15px;
+            transition: all 0.3s;
+            border-left: 4px solid #6c757d;
+        }
+
+        .result-card:hover {
+            border-left-color: #0d6efd;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-title {
+            color: #0d6efd;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .result-title:hover {
+            text-decoration: underline;
+        }
+
+        .result-info {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .modal-body {
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        #resetFilters {
+            margin-top: 10px;
+        }
+
+        .badge-info {
+            margin-right: 5px;
+            margin-bottom: 5px;
+            background-color: #e9ecef;
+            color: #495057;
+            font-weight: normal;
+        }
+
+        .no-results {
+            padding: 50px;
+            text-align: center;
+            color: #6c757d;
+        }
+
+        #map {
+            height: 60vh;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
+            <a href="/"
+                class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
+                <img src="images/logo.png" class="img-fluid bi me-2" width="20">
+                <span class="fs-4">Graffiti Gazetteer</span>
+            </a>
+
+            <ul class="nav nav-pills">
+                <li class="nav-item"><a href="index.html" class="nav-link" aria-current="page">Home</a></li>
+                <li class="nav-item"><a href="results.html" class="nav-link active">Browse</a></li>
+            </ul>
+        </header>
+    </div>
+    <div class="container-fluid my-4">
+        <div class="row">
+            <!-- Filters Column -->
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Search Filters
+                            <i class="bi bi-geo-alt-fill float-end" style="cursor: pointer;" data-bs-toggle="modal"
+                                data-bs-target="#mapModal"></i>
+                        </h5>
+                    </div>
+                    <div class="card-body" style="height: 75vh; overflow-x: auto;">
+                        <!-- Where Filter -->
+                        <div class="filter-section">
+                            <h5 class="filter-title">Where</h5>
+                            <div class="mb-3">
+                                <label for="locationFilter" class="form-label">Location/Region</label>
+                                <select class="form-select" id="locationFilter">
+                                    <option value="">Any Location</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="siteFilter" class="form-label">Site</label>
+                                <select class="form-select" id="siteFilter">
+                                    <option value="">Any Site</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="buildingFilter" class="form-label">Building</label>
+                                <select class="form-select" id="buildingFilter">
+                                    <option value="">Any Building</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="materialFilter" class="form-label">Material</label>
+                                <select class="form-select" id="materialFilter">
+                                    <option value="">Any Material</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- What & How Filter -->
+                        <div class="filter-section">
+                            <h5 class="filter-title">What & How</h5>
+                            <div class="mb-3">
+                                <label for="techniqueFilter" class="form-label">Technique</label>
+                                <select class="form-select" id="techniqueFilter">
+                                    <option value="">Any Technique</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="languageFilter" class="form-label">Language</label>
+                                <select class="form-select" id="languageFilter">
+                                    <option value="">Any Language</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="scriptFilter" class="form-label">Script</label>
+                                <select class="form-select" id="scriptFilter">
+                                    <option value="">Any Script</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="typeFilter" class="form-label">Type of Inscription</label>
+                                <select class="form-select" id="typeFilter">
+                                    <option value="">Any Type</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Who Filter -->
+                        <div class="filter-section">
+                            <h5 class="filter-title">Who</h5>
+                            <div class="mb-3">
+                                <label for="personFilter" class="form-label">Person Name</label>
+                                <input type="text" class="form-control" id="personFilter" placeholder="Enter a name">
+                            </div>
+                            <div class="mb-3">
+                                <label for="royalFilter" class="form-label">Royal Name</label>
+                                <select class="form-select" id="royalFilter">
+                                    <option value="">Any Royal Name</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="divineFilter" class="form-label">Divine Name</label>
+                                <select class="form-select" id="divineFilter">
+                                    <option value="">Any Divine Name</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- When Filter -->
+                        <div class="filter-section">
+                            <h5 class="filter-title">When</h5>
+                            <div class="mb-3">
+                                <label for="primaryDateFilter" class="form-label">Primary Date</label>
+                                <select class="form-select" id="primaryDateFilter">
+                                    <option value="">Any Primary Date</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="secondaryDateFilter" class="form-label">Secondary Date</label>
+                                <select class="form-select" id="secondaryDateFilter">
+                                    <option value="">Any Secondary Date</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Contents Filter -->
+                        <div class="filter-section">
+                            <h5 class="filter-title">Contents</h5>
+                            <div class="mb-3">
+                                <label for="contentFilter" class="form-label">Text Content</label>
+                                <input type="text" class="form-control" id="contentFilter"
+                                    placeholder="Search text content">
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="card-footer text-body-secondary">
+                        <button id="resetFilters" class="btn btn-secondary w-100">Reset All Filters</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Column -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Results</h5>
+                        <span id="resultCount" class="badge bg-light text-dark">0 Results</span>
+                    </div>
+                    <div class="card-body">
+                        <div id="searchResults">
+                            <!-- Results will be populated here -->
+                            <div class="no-results">
+                                <h4>Loading inscriptions...</h4>
+                                <p>Please wait while we fetch the data.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailModalLabel">Inscription Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="detailContent">
+                    <!-- Detail content will be populated here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal structure -->
+    <div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="mapModalLabel">Map</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Leaflet Map -->
+                    <div id="map"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5.3 JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <!-- Custom JavaScript -->
+    <script>
+        // Set the path for the default marker icons
+        L.Icon.Default.imagePath = 'https://unpkg.com/leaflet@1.9.4/dist/images/';
+
+        // L.i18n.init({
+        //     lang: 'en' // Set language to English
+        // });
+
+        // Initialize the map variable outside to be used after modal opens
+        let map = null;
+
+        $(document).ready(function () {
+
+            // Store the CSV data parsed into an array of objects
+            let inscriptionsData = [];
+
+            // Function to initialize the map when the modal is shown
+            $('#mapModal').on('shown.bs.modal', function () {
+                // When the modal is shown, resize the map
+                //map.invalidateSize();  // This ensures the map resizes correctly inside the modal
+                let interval = setInterval(() => {
+                    if (map) {
+                        clearInterval(interval)
+                        //$('#divLoadingMap').addClass('d-none')
+                        map.invalidateSize();
+                    }
+                }, 500);
+            });
+
+            // Optional: Destroy the map when the modal is hidden to avoid memory leaks
+            $('#mapModal').on('hidden.bs.modal', function () {
+                if (map) {
+                    map.remove();  // Remove the map to reset
+                }
+            });
+
+
+
+            // Parse the CSV data
+            function parseCSV(csvData) {
+                // Split the CSV into rows
+                const rows = csvData.trim().split('\n');
+
+                // Extract headers (first row)
+                const headers = rows[0].split(',');
+
+                // Process each data row
+                const data = [];
+                for (let i = 1; i < rows.length; i++) {
+                    const values = rows[i].split(',');
+                    const obj = {};
+
+                    // Handle values that might contain commas within quotes
+                    let j = 0;
+                    let currentValue = "";
+                    let insideQuotes = false;
+
+                    for (let k = 0; k < values.length; k++) {
+                        if (insideQuotes) {
+                            currentValue += "," + values[k];
+                            if (values[k].endsWith('"')) {
+                                insideQuotes = false;
+                                obj[headers[j].trim()] = currentValue.replace(/^"|"$/g, '');
+                                j++;
+                                currentValue = "";
+                            }
+                        } else {
+                            if (values[k].startsWith('"') && !values[k].endsWith('"')) {
+                                insideQuotes = true;
+                                currentValue = values[k];
+                            } else {
+                                obj[headers[j].trim()] = values[k];
+                                j++;
+                            }
+                        }
+                    }
+
+                    data.push(obj);
+                }
+
+                //console.log(data)
+                return data;
+            }
+
+            // Load and process the CSV data
+            function loadData() {
+                // For demo purposes, we'll use the provided CSV data directly
+                const csvData = `Unique identifier,Pleiades ID & URL,Longitude,Latitude,TM identifier,TLA identifier,TLA stable URL,Land,Region,Area,Site conventional modern name,Site ancient name(s),TopBib code,Building,Part of building,Landscape feature,Room/space,Wall,Scene,Plan,Material,Execution technique,Colour,Object type,State of preservation,Languages,Height above ground,Location 1 - primary scene placement,Location 2 - in relation to other graffiti,Type of feature,Type of inscription,Contents ,Script type,Royal  name(s),Private name - writer/signature,Other private names,Name cross-references,Divine names,Title(s),Date primary surface,Date secondary feature,References unpublished,Reference archive/unpublished URL,References published (with OEB codes),Zotero link,Photograph,Drawing,Palaeography information,Research log,Scan,Text edition,Contributor,Timestamp latest modification
+see100001,https://pleiades.stoa.org/places/195443086,31.20404,29.896115,,,,Egypt,Lower Egypt,Memphis,Abusir,,,Pyramid complex of Sahure,Pyramid Temple of Sahure,,Unknown,Unknown,Unknown,,"non-organic, stone, limestone","additive, painted",black,,Unknown,Egyptian,Unknown,unknown,,Text,Visitors' dipinto,"r mAA, gm.n=f s.t mj p.t, myrrh sequence, offering formula",hieratic,"Thutmose III, Sahure",Not preserved,,,,,"Old Kingdom, 5th dynasty","New Kingdom, 18th dynasty","GIA, Gardiner Mss., AHG 29.60/B",Borchardt and Moeller documentation and records currently unaccounted for.," Baines, John 1973. The destruction of the pyramid temple of Sa?ure'. Gцttinger Miszellen 4, 9-14 (OEB 16067 );   Megally, Mounir 1981. Two visitors' graffiti from Abы?оr. Chronique d'Йgypte 56 (112), 218-240 (OEB 23753 );  Peden, Alexander J. 2001. The graffiti of pharaonic Egypt: scope and roles of informal writings (c. 3100-332 B.C.). Probleme der Дgyptologie 17. Leiden; Boston: Brill, 59 (OEB 46203); PM III2, 333–34;  Borchardt, Ludwig 1910. Das Grabdenkmal des Kцnigs ?a??u-Re? I: Der Bau. Ausgrabungen der Deutschen Orient-Gesellschaft in Abusir 1902-1908 6; Wissenschaftliche Verцffentlichungen der Deutschen Orient-Gesellschaft 14. Leipzig: J. C. Hinrichs, 120–21, with finds on pp. 131–35 (OEB 134997).",,,,,"Noted by L. Borchardt, recorded by G. Moeller; editio princeps M. Megally from archived material; not observed in situ since Moeller. ",,,,
+see100002,https://pleiades.stoa.org/places/195443086,31.20404,29.896115,,,,Egypt,Lower Egypt,Memphis,Abusir,,,Pyramid complex of Sahure,Pyramid Temple of Sahure,,Unknown,Unknown,Unknown,,"non-organic, stone, limestone","additive, painted",black,,Unknown,Egyptian,Unknown,unknown,,Text,Visitors' dipinto,"r mAA, gm.n=f s.t mj p.t, myrrh sequence, offering formula",hieratic,Sahure,Amenemhat,,,,,"Old Kingdom, 5th dynasty","New Kingdom, 18th dynasty","GIA, Gardiner Mss., AHG 29.60/A",Borchardt and Moeller documentation and records currently unaccounted for.," Baines, John 1973. The destruction of the pyramid temple of Sa?ure'. Gцttinger Miszellen 4, 9-14 (OEB 16067 );   Megally, Mounir 1981. Two visitors' graffiti from Abы?оr. Chronique d'Йgypte 56 (112), 218-240 (OEB 23753 );  Peden, Alexander J. 2001. The graffiti of pharaonic Egypt: scope and roles of informal writings (c. 3100-332 B.C.). Probleme der Дgyptologie 17. Leiden; Boston: Brill, 59 (OEB 46203); PM III2, 333–34;  Borchardt, Ludwig 1910. Das Grabdenkmal des Kцnigs ?a??u-Re? I: Der Bau. Ausgrabungen der Deutschen Orient-Gesellschaft in Abusir 1902-1908 6; Wissenschaftliche Verцffentlichungen der Deutschen Orient-Gesellschaft 14. Leipzig: J. C. Hinrichs, 120–21, with finds on pp. 131–35 (OEB 134997).",,,,,"Noted by L. Borchardt, recorded by G. Moeller; editio princeps M. Megally from archived material; not observed in situ since Moeller. ",,,,
+see100003,https://pleiades.stoa.org/places/195443086,31.20404,29.896115,,,,Egypt,Lower Egypt,Memphis,Abusir,,,Pyramid complex of Sahure,Pyramid Temple of Sahure,,Unknown,Unknown,Unknown,,"non-organic, stone, limestone","additive, painted",black,,Unknown,Egyptian,Unknown,unknown,,Text,Visitors' dipinto,[gm.n=f s.t mj p.t],hieratic,not preserved,Not preserved,,,,,"Old Kingdom, 5th dynasty","New Kingdom, 18th dynasty","GIA, Gardiner Mss., AHG 29.60/A.",Borchardt and Moeller documentation and records currently unaccounted for.," Baines, John 1973. The destruction of the pyramid temple of Sa?ure'. Gцttinger Miszellen 4, 9-14 (OEB 16067 );   Megally, Mounir 1981. Two visitors' graffiti from Abы?оr. Chronique d'Йgypte 56 (112), 218-240 (OEB 23753 );  Peden, Alexander J. 2001. The graffiti of pharaonic Egypt: scope and roles of informal writings (c. 3100-332 B.C.). Probleme der Дgyptologie 17. Leiden; Boston: Brill, 59 (OEB 46203); PM III2, 333–34;  Borchardt, Ludwig 1910. Das Grabdenkmal des Kцnigs ?a??u-Re? I: Der Bau. Ausgrabungen der Deutschen Orient-Gesellschaft in Abusir 1902-1908 6; Wissenschaftliche Verцffentlichungen der Deutschen Orient-Gesellschaft 14. Leipzig: J. C. Hinrichs, 120–21, with finds on pp. 131–35 (OEB 134997).",,,,,"Noted by L. Borchardt, recorded by G. Moeller; editio princeps M. Megally from archived material; not observed in situ since Moeller. ",,,,
+see100004,https://pleiades.stoa.org/places/609762511,31.9184187,26.1845417,,,,Egypt,Upper Egypt,Abydos,Abydos,,,Temple of Seti I,Osiris Complex,,Chapel of Isis (O),West wall,"King offering to deities, raised relief",,"non-organic, stone, limestone","subtractive, incised",,,Good,Greek,1.55,external doorframe west (PM 194),,Text,Graffito,name,Greek,,Besas,,,,,"New Kingdom, 19th dynasty",,,,"no. 1 in Perdrizet, Paul, and Gustave Lefebvre. 1919. Les graffites grecs du Memnonion d'Abydos. Nancy: Berger-Levrault (OEB 146902)",,,,,,,,,
+see100005,https://pleiades.stoa.org/places/609762511,31.9184187,26.1845417,,,,Egypt,Upper Egypt,Abydos,Abydos,,,Temple of Seti I,Osiris Complex,,Chapel of Isis (O),West wall,"King offering to deities, raised relief",,"non-organic, stone, limestone","subtractive, incised",,,Good,Greek,2,internal doorframe west,,Text,Graffito,??????,Greek,,,,,,,"New Kingdom, 19th dynasty",,,,"no. 1bis in Perdrizet, Paul, and Gustave Lefebvre. 1919. Les graffites grecs du Memnonion d'Abydos. Nancy: Berger-Levrault. (OEB 146902)",,,,,,,,,
+see100006,https://pleiades.stoa.org/places/609762511,31.9184187,26.1845417,,,,Egypt,Upper Egypt,Abydos,Abydos,,,Temple of Seti I,Osiris Complex,,Chapel of Isis (O),West wall,"King offering to deities, raised relief",,"non-organic, stone, limestone","subtractive, incised",,,Good,Greek,1.95,"west wall, 1st tableau, king's chest (PM 196)",,Text,Graffito, ???,Greek,,Sarapion,,,,,"New Kingdom, 19th dynasty","Roman period, Claudius",,,"no. 2 in Perdrizet, Paul, and Gustave Lefebvre. 1919. Les graffites grecs du Memnonion d'Abydos. Nancy: Berger-Levrault. (OEB 146902)",,,,,,,,,
+see100007,https://pleiades.stoa.org/places/609762511,31.9184187,26.1845417,,,,Egypt,Upper Egypt,Abydos,Abydos,,,Temple of Seti I,Osiris Complex,,Chapel of Isis (O),West wall,"King offering to deities, raised relief",,"non-organic, stone, limestone","subtractive, incised",,,Good,Greek,0.95,"west wall, 1st tableau, next to elbow of Osiris (PM 196)",,Text,Graffito,??????????,Greek,,Favorinus,,,,,"New Kingdom, 19th dynasty",,,,"no. 3 in Perdrizet, Paul, and Gustave Lefebvre. 1919. Les graffites grecs du Memnonion d'Abydos. Nancy: Berger-Levrault. (OEB 146902)",,,,,,,,,
+see100008,https://pleiades.stoa.org/places/609762511,31.9184187,26.1845417,,,,Egypt,Upper Egypt,Abydos,Abydos,,,Temple of Seti I,Osiris Complex,,Chapel of Isis (O),West wall,"King offering to deities, raised relief",,"non-organic, stone, limestone","subtractive, incised",,,Good,Greek,1.87,"west wall, 1st tableau, near elbow of Osiris (PM 196)",,Text,Graffito, ???,Greek,,Filokrates,,,,,"New Kingdom, 19th dynasty",,,,"no. 4 in Perdrizet, Paul, and Gustave Lefebvre. 1919. Les graffites grecs du Memnonion d'Abydos. Nancy: Berger-Levrault. (OEB 146902)",,,,,,,,,
+see100009,https://pleiades.stoa.org/places/609762511,31.9184187,26.1845417,,,,Egypt,Upper Egypt,Abydos,Abydos,,,Temple of Seti I,Osiris Complex,,Chapel of Isis (O),West wall,"King offering to deities, raised relief",,"non-organic, stone, limestone","subtractive, incised",,,Good,Greek,1.64,"west wall, 1st tableau, on the throne of Osiris (PM 196)",,Text,,??????????,Greek,,,,,,,"New Kingdom, 19th dynasty",,,,"no. 5 in Perdrizet, Paul, and Gustave Lefebvre. 1919. Les graffites grecs du Memnonion d'Abydos. Nancy: Berger-Levrault. (OEB 146902)",,,,,,,,,`;
+
+                inscriptionsData = parseCSV(csvData);
+
+                // Initialize the map inside the modal only when the modal is shown
+                map = L.map('map').setView([inscriptionsData[0].Latitude, inscriptionsData[0].Longitude], 6); // Set to default center
+
+                // Add a tile layer (OpenStreetMap)
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+
+                // Add markers to the map
+                inscriptionsData.forEach(function (ins) {
+                    const site = ins['Site conventional modern name'] || 'Unknown Site';
+                    const type = ins['Type of inscription'] || 'Unknown Type';
+                    const date = ins['Date secondary feature'] || ins['Date primary surface'] || 'Unknown Date';
+                    const heading = `${site} - ${type} (${date})`;
+                    L.marker([parseFloat(ins.Latitude), parseFloat(ins.Longitude)])
+                        .addTo(map)
+                        .bindPopup(heading);
+                });
+
+                // Populate filter options
+                populateFilterOptions();
+
+                // Display results initially
+                displayResults();
+            }
+
+            // Populate filter dropdowns with unique values from the data
+            function populateFilterOptions() {
+                const uniqueValues = {
+                    locationFilter: new Set(),
+                    siteFilter: new Set(),
+                    buildingFilter: new Set(),
+                    materialFilter: new Set(),
+                    techniqueFilter: new Set(),
+                    languageFilter: new Set(),
+                    scriptFilter: new Set(),
+                    typeFilter: new Set(),
+                    royalFilter: new Set(),
+                    divineFilter: new Set(),
+                    primaryDateFilter: new Set(),
+                    secondaryDateFilter: new Set()
+                };
+
+                // Extract unique values for each filter
+                inscriptionsData.forEach(item => {
+                    if (item.Region) uniqueValues.locationFilter.add(item.Region);
+                    if (item['Site conventional modern name']) uniqueValues.siteFilter.add(item['Site conventional modern name']);
+                    if (item.Building) uniqueValues.buildingFilter.add(item.Building);
+                    if (item.Material) uniqueValues.materialFilter.add(item.Material);
+                    if (item['Execution technique']) uniqueValues.techniqueFilter.add(item['Execution technique']);
+                    if (item.Languages) uniqueValues.languageFilter.add(item.Languages);
+                    if (item['Script type']) uniqueValues.scriptFilter.add(item['Script type']);
+                    if (item['Type of inscription']) uniqueValues.typeFilter.add(item['Type of inscription']);
+                    if (item['Royal  name(s)']) {
+                        const royalNames = item['Royal  name(s)'].split(',');
+                        royalNames.forEach(name => uniqueValues.royalFilter.add(name.trim()));
+                    }
+                    if (item['Divine names']) {
+                        const divineNames = item['Divine names'].split(',');
+                        divineNames.forEach(name => uniqueValues.divineFilter.add(name.trim()));
+                    }
+                    if (item['Date primary surface']) uniqueValues.primaryDateFilter.add(item['Date primary surface']);
+                    if (item['Date secondary feature']) uniqueValues.secondaryDateFilter.add(item['Date secondary feature']);
+                });
+
+                // Populate each filter dropdown
+                Object.keys(uniqueValues).forEach(filterId => {
+                    const values = Array.from(uniqueValues[filterId]).sort();
+                    const selectElement = document.getElementById(filterId);
+
+                    values.forEach(value => {
+                        if (value) { // Only add non-empty values
+                            const option = document.createElement('option');
+                            option.value = value;
+                            option.textContent = value;
+                            selectElement.appendChild(option);
+                        }
+                    });
+                });
+            }
+
+            // Filter the data based on current filter selections
+            function filterData() {
+                const filters = {
+                    location: $('#locationFilter').val(),
+                    site: $('#siteFilter').val(),
+                    building: $('#buildingFilter').val(),
+                    material: $('#materialFilter').val(),
+                    technique: $('#techniqueFilter').val(),
+                    language: $('#languageFilter').val(),
+                    script: $('#scriptFilter').val(),
+                    type: $('#typeFilter').val(),
+                    person: $('#personFilter').val().toLowerCase(),
+                    royal: $('#royalFilter').val(),
+                    divine: $('#divineFilter').val(),
+                    primaryDate: $('#primaryDateFilter').val(),
+                    secondaryDate: $('#secondaryDateFilter').val(),
+                    content: $('#contentFilter').val().toLowerCase()
+                };
+
+                return inscriptionsData.filter(item => {
+                    // Check each filter criterion
+                    if (filters.location && item.Region !== filters.location) return false;
+                    if (filters.site && item['Site conventional modern name'] !== filters.site) return false;
+                    if (filters.building && item.Building !== filters.building) return false;
+                    if (filters.material && item.Material && !item.Material.includes(filters.material)) return false;
+                    if (filters.technique && item['Execution technique'] && !item['Execution technique'].includes(filters.technique)) return false;
+                    if (filters.language && item.Languages !== filters.language) return false;
+                    if (filters.script && item['Script type'] !== filters.script) return false;
+                    if (filters.type && item['Type of inscription'] !== filters.type) return false;
+                    if (filters.primaryDate && item['Date primary surface'] !== filters.primaryDate) return false;
+                    if (filters.secondaryDate && item['Date secondary feature'] !== filters.secondaryDate) return false;
+
+                    // Person name (check in multiple fields)
+                    if (filters.person) {
+                        const personFields = [
+                            'Private name - writer/signature',
+                            'Other private names',
+                            'Royal  name(s)'
+                        ];
+                        const personMatch = personFields.some(field =>
+                            item[field] && item[field].toLowerCase().includes(filters.person)
+                        );
+                        if (!personMatch) return false;
+                    }
+
+                    // Royal name
+                    if (filters.royal && (!item['Royal  name(s)'] || !item['Royal  name(s)'].includes(filters.royal))) return false;
+
+                    // Divine name
+                    if (filters.divine && (!item['Divine names'] || !item['Divine names'].includes(filters.divine))) return false;
+
+                    // Content search
+                    if (filters.content && (!item.Contents || !item.Contents.toLowerCase().includes(filters.content))) return false;
+
+                    return true;
+                });
+            }
+
+            // Display the filtered results
+            function displayResults() {
+                const filteredData = filterData();
+                const resultsContainer = $('#searchResults');
+
+                // Update result count
+                $('#resultCount').text(`${filteredData.length} Results`);
+
+                // Clear previous results
+                resultsContainer.empty();
+
+                if (filteredData.length === 0) {
+                    resultsContainer.html('<div class="no-results"><h4>No matching inscriptions found</h4><p>Try adjusting your filters to see more results.</p></div>');
+                    return;
+                }
+
+                // Create and append result cards
+                filteredData.forEach(item => {
+                    // Create the heading by combining site, type, and date
+                    const site = item['Site conventional modern name'] || 'Unknown Site';
+                    const type = item['Type of inscription'] || 'Unknown Type';
+                    const date = item['Date secondary feature'] || item['Date primary surface'] || 'Unknown Date';
+                    const heading = `${site} - ${type} (${date})`;
+
+                    // Create result card
+                    const card = `
+                        <div class="card result-card mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <a href="#" class="result-title" data-id="${item['Unique identifier']}">${heading}</a>
+                                </h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p class="result-info">
+                                            <strong>Area:</strong> ${item.Area || 'N/A'}<br>
+                                            <strong>Site:</strong> ${site}<br>
+                                            <strong>Building:</strong> ${item.Building || 'N/A'}
+                                        </p>
+                                        </div>
+                                    <div class="col-md-6">
+                                        <p class="result-info">
+                                            <strong>Date:</strong> ${date}<br>
+                                            <strong>Type:</strong> ${type}<br>
+                                            <strong>Script:</strong> ${item['Script type'] || 'N/A'}<br>
+                                            <strong>Language:</strong> ${item.Languages || 'N/A'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <span class="badge badge-info">${item.Region || ''}</span>
+                                    ${item.Material ? `<span class="badge badge-info">${item.Material}</span>` : ''}
+                                    ${item['Execution technique'] ? `<span class="badge badge-info">${item['Execution technique']}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    resultsContainer.append(card);
+                });
+
+                // Add click event for result titles to show details
+                $('.result-title').on('click', function (e) {
+                    e.preventDefault();
+                    const id = $(this).data('id');
+                    showInscriptionDetail(id);
+                });
+            }
+
+            // Show detail modal for a specific inscription
+            function showInscriptionDetail(id) {
+                const item = inscriptionsData.find(item => item['Unique identifier'] === id);
+
+                if (!item) return;
+
+                let mapDetail = `<div id="divMapDetail" style="height: 25vh;" class="mb-2"></div>`;
+
+                // Format the content for the modal
+                let contentHtml = `${mapDetail}
+                    <h4>${item['Site conventional modern name']} - ${item['Type of inscription']}</h4>
+                    <p class="text-muted">${item['Date secondary feature'] || item['Date primary surface']}</p>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <h5>Location Information</h5>
+                            <table class="table table-bordered">
+                                <tr><th>Land</th><td>${item.Land || 'N/A'}</td></tr>
+                                <tr><th>Region</th><td>${item.Region || 'N/A'}</td></tr>
+                                <tr><th>Area</th><td>${item.Area || 'N/A'}</td></tr>
+                                <tr><th>Site</th><td>${item['Site conventional modern name'] || 'N/A'}</td></tr>
+                                <tr><th>Ancient Name</th><td>${item['Site ancient name(s)'] || 'N/A'}</td></tr>
+                                <tr><th>Building</th><td>${item.Building || 'N/A'}</td></tr>
+                                <tr><th>Part of Building</th><td>${item['Part of building'] || 'N/A'}</td></tr>
+                                <tr><th>Room/Space</th><td>${item['Room/space'] || 'N/A'}</td></tr>
+                                <tr><th>Wall</th><td>${item.Wall || 'N/A'}</td></tr>
+                                <tr><th>Location</th><td>${item['Location 1 - primary scene placement'] || 'N/A'}</td></tr>
+                            </table>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h5>Inscription Details</h5>
+                            <table class="table table-bordered">
+                                <tr><th>Type</th><td>${item['Type of inscription'] || 'N/A'}</td></tr>
+                                <tr><th>Script</th><td>${item['Script type'] || 'N/A'}</td></tr>
+                                <tr><th>Language</th><td>${item.Languages || 'N/A'}</td></tr>
+                                <tr><th>Material</th><td>${item.Material || 'N/A'}</td></tr>
+                                <tr><th>Technique</th><td>${item['Execution technique'] || 'N/A'}</td></tr>
+                                <tr><th>Color</th><td>${item.Colour || 'N/A'}</td></tr>
+                                <tr><th>Preservation</th><td>${item['State of preservation'] || 'N/A'}</td></tr>
+                                <tr><th>Height</th><td>${item['Height above ground'] || 'N/A'}</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <h5>Content</h5>
+                            <table class="table table-bordered">
+                                <tr><th>Contents</th><td>${item.Contents || 'N/A'}</td></tr>
+                                <tr><th>Royal Name(s)</th><td>${item['Royal  name(s)'] || 'N/A'}</td></tr>
+                                <tr><th>Writer/Signature</th><td>${item['Private name - writer/signature'] || 'N/A'}</td></tr>
+                                <tr><th>Other Names</th><td>${item['Other private names'] || 'N/A'}</td></tr>
+                                <tr><th>Divine Names</th><td>${item['Divine names'] || 'N/A'}</td></tr>
+                                <tr><th>Titles</th><td>${item['Title(s)'] || 'N/A'}</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <h5>Dating</h5>
+                            <table class="table table-bordered">
+                                <tr><th>Primary Date</th><td>${item['Date primary surface'] || 'N/A'}</td></tr>
+                                <tr><th>Secondary Date</th><td>${item['Date secondary feature'] || 'N/A'}</td></tr>
+                            </table>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h5>References</h5>
+                            <p>${item['References published (with OEB codes)'] || 'No published references'}</p>
+                            <p>${item['References unpublished'] || 'No unpublished references'}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <h5>Additional Information</h5>
+                            <p>${item['Research log'] || 'No additional information available.'}</p>
+                        </div>
+                    </div>
+                `;
+
+                // Set the modal title and content
+                $('#detailModalLabel').text(`Inscription ${id}`);
+                $('#detailContent').html(contentHtml);
+
+                // Initialize the map inside the modal only when the modal is shown
+                let m = L.map('divMapDetail').setView([item.Latitude, item.Longitude], 6); // Set to default center
+
+                // Add a tile layer (OpenStreetMap)
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(m);
+
+                L.marker([parseFloat(item.Latitude), parseFloat(item.Longitude)])
+                    .addTo(m)
+                    .bindPopup('Hello');
+
+                // Show the modal
+                const modal = new bootstrap.Modal(document.getElementById('detailModal'));
+                modal.show();
+
+                let interval = setInterval(() => {
+                    clearInterval(interval)
+                    m.invalidateSize();
+                }, 500);
+            }
+
+            // Event listeners
+            // Filter change events
+            $('.form-select, #personFilter, #contentFilter').on('change keyup', function () {
+                displayResults();
+            });
+
+            // Reset filters button
+            $('#resetFilters').on('click', function () {
+                // Reset all dropdowns
+                $('.form-select').val('');
+
+                // Reset text inputs
+                $('#personFilter, #contentFilter').val('');
+
+                // Update results
+                displayResults();
+            });
+
+            // Initialize the interface
+            loadData();
+        });
+    </script>
+</body>
+
+</html>
