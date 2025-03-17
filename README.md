@@ -1,4 +1,4 @@
-# GraffitiGazetteer
+# Graffiti Gazetteer Development
 
 ## Introduction
 Ancient Egyptian interaction with places, buildings, and artefacts was reflected in the practice of secondary epigraphy (graffiti for short). Short texts and images, some outwardly resembling modern ‘tags’ and others more like ‘street art’, appeared in the funerary environment, or on temple architecture. They share features with rock inscriptions and rock art, such as select phraseology or functions. These seemingly unprepossessing artefacts are in fact eloquent traces of ancient societies and cultures, allowing fragmentary insights into both elite and non-elite lives and the roles that monuments continued to play in both of these long after their original construction. Their study has benefited from using concepts developed in anthropology, cultural history, literacy studies and cognitive archaeology, offering a rich interpretation. 
