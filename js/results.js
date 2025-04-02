@@ -36,7 +36,7 @@
      // Load and process the CSV data
      async function loadData() {
          // For demo purposes, we'll use the provided CSV data directly
-         
+         //debugger;
          let resp = await fetch(`https://raw.githubusercontent.com/${organization}/${repo}/main/${path}`);
          let csvData = await resp.text();
          inscriptionsData = parseCSV(csvData);

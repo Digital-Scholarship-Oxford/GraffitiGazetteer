@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archaeological Data - Admin Panel</title>
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+
+    <style>
+        .drag-drop-area {
+            border: 2px dashed #ccc;
+            border-radius: 20px;
+            width: 780px;
+            font-family: sans-serif;
+            margin: 100px auto;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .drag-drop-area.highlight {
+            border-color: #007bff;
+            background-color: rgba(0, 123, 255, 0.1);
+        }
+        #file-list {
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+                    <div class="container-fluid">
+                        <a class="navbar-brand" href="#">Archaeological Data Admin Panel</a>
+                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                        <div class="collapse navbar-collapse" id="navbarNav">
+                            <ul class="navbar-nav ms-auto">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#" id="logoutBtn">Logout</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">Upload Archaeological Data</h4>
+                        <!-- <button id="exportCSV" class="btn btn-light">Export to CSV</button> -->
+                    </div>
+                    <div class="card-body">
+                        <div class="drag-drop-area" id="drop-zone">
+                            <input type="file" id="file-input" class="d-none" accept=".csv" >
+                            <h3>Drag and Drop CSV data File Here</h3>
+                            <p>or</p>
+                            <button class="btn btn-primary" id="file-choose-btn">Choose CSV data File</button>
+                            
+                            <div id="file-list" class="mt-3"></div>
+                            
+                            <button class="btn btn-success mt-3" id="upload-btn" disabled>Upload</button>
+                        </div>
+                        <!-- <div class="table-responsive">
+                            <table id="dataTable" class="table table-striped table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th style="display:none;">ID</th>
+                                        <th>Unique Identifier</th>
+                                        <th>Site Name</th>
+                                        <th>Region</th>
+                                        <th>Area</th>
+                                        <th>Date Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tableBody">
+                                </tbody>
+                            </table>
+                        </div> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Record Details Modal -->
+    <!-- <div class="modal fade" id="recordDetailsModal" tabindex="-1" aria-labelledby="recordDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="recordDetailsModalLabel">Record Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="recordDetailsContent">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div> -->
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap 5.3 Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <div id="divLoadJs"></div>
+    <script>
+        $('#divLoadJs').load('libraries.html');  
+    </script>
+    
+    <script>
+       
+        
+    //     // Load data from Firestore
+    //     const loadData = async () => {
+    //         let querySnapshot = await db.collection('graffitiData')
+    //             .orderBy('Timestamp latest modification', 'desc')
+    //             .get();
+            
+    //         const tableBody = document.getElementById('tableBody');
+    //         tableBody.innerHTML = '';
+            
+    //         querySnapshot.forEach((doc) => {
+    //             const data = doc.data();
+    //             const row = document.createElement('tr');
+                
+    //             // Format date
+    //             const createdDate = new Date(data['Timestamp latest modification']);
+    //             const formattedDate = createdDate.toLocaleString();
+                
+    //             row.innerHTML = `
+    //                 <td style="display:none;">${doc.id}</td>
+    //                 <td>${data['Unique identifier'] || ''}</td>
+    //                 <td>${data['Site conventional modern name'] || ''}</td>
+    //                 <td>${data['Region'] || ''}</td>
+    //                 <td>${data['Area'] || ''}</td>
+    //                 <td>${formattedDate}</td>
+    //                 <td>
+    //                     <button class="btn btn-sm btn-info view-btn" data-id="${doc.id}">View</button>
+    //                     <button class="btn btn-sm btn-danger delete-btn" data-id="${doc.id}">Delete</button>
+    //                 </td>
+    //             `;
+                
+    //             tableBody.appendChild(row);
+    //         });
+            
+    //         // Initialize DataTable
+    //         $('#dataTable').DataTable({
+    //             responsive: true,
+    //             order: [[5, 'desc']]
+    //         });
+            
+    //         // Add event listeners to view buttons
+    //         document.querySelectorAll('.view-btn').forEach(button => {
+    //             button.addEventListener('click', function() {
+    //                 const id = this.getAttribute('data-id');
+    //                 showRecordDetails(id);
+    //             });
+    //         });
+            
+    //         // Add event listeners to delete buttons
+    //         document.querySelectorAll('.delete-btn').forEach(button => {
+    //             button.addEventListener('click', function() {
+    //                 const id = this.getAttribute('data-id');
+    //                 if (confirm('Are you sure you want to delete this record?')) {
+    //                     deleteRecord(id);
+    //                 }
+    //             });
+    //         });
+               
+    // };
+    
+    // (async () => { await loadData()})();
+
+
+    //     // Show record details in modal
+    //     function showRecordDetails(id) {
+    //         db.collection('graffitiData').doc(id)
+    //             .get()
+    //             .then((doc) => {
+    //                 if (doc.exists) {
+    //                     const data = doc.data();
+    //                     const modalContent = document.getElementById('recordDetailsContent');
+
+    //                         // Define the order of fields
+    //                     const fieldOrder = [
+    //                         'Unique identifier',
+    //                         'Pleiades ID & URL',
+    //                         'Longitude',
+    //                         'Latitude',
+    //                         'TM identifier',
+    //                         'TLA identifier',
+    //                         'TLA stable URL',
+    //                         'Land',
+    //                         'Region',
+    //                         'Area',
+    //                         'Site conventional modern name',
+    //                         'Site ancient name(s)',
+    //                         'PM code',
+    //                         'TopBib code',
+    //                         'Building',
+    //                         'Part of building',
+    //                         'Landscape feature',
+    //                         'Room/space',
+    //                         'Wall',
+    //                         'Scene',
+    //                         'Plan',
+    //                         'Material',
+    //                         'Execution technique',
+    //                         'Colour',
+    //                         'Object type',
+    //                         'State of preservation',
+    //                         'Languages',
+    //                         'Height above ground',
+    //                         'Location 1 - primary scene placement',
+    //                         'Location 2 - in relation to other graffiti',
+    //                         'Type of feature',
+    //                         'Type of inscription',
+    //                         'Contents',
+    //                         'Script type',
+    //                         'Royal name(s)',
+    //                         'Private name - writer/signature',
+    //                         'Other private names',
+    //                         'Name cross-references',
+    //                         'Divine names',
+    //                         'Title(s)',
+    //                         'Date primary surface',
+    //                         'Date secondary feature',
+    //                         'References unpublished',
+    //                         'Reference archive/unpublished URL',
+    //                         'References published (with OEB codes)',
+    //                         'Zotero link',
+    //                         'Photograph',
+    //                         'Drawing',
+    //                         'Palaeography information',
+    //                         'Research log',
+    //                         'Scan',
+    //                         'Text edition',
+    //                         'Contributor',
+    //                         'Timestamp latest modification'
+    //                     ];
+                        
+    //                     // Build HTML for record details
+    //                     let html = '<div class="container-fluid">';
+
+    //                     fieldOrder.forEach(field => {
+    //                          // Basic Information
+    //                         html += '<div class="row mb-3"><div class="col-12"><hr></div></div>';
+    //                         html += '<div class="row mb-3">';
+    //                         html += `<div class="col-md-4"><strong>${field}:</strong> ${data[field] || ''}</div>`;
+    //                         html += '</div>';
+    //                     });
+                        
+                        
+    //                     html += '</div>'; // Close container
+                        
+    //                     modalContent.innerHTML = html;
+                        
+    //                     // Show modal
+    //                     const modal = new bootstrap.Modal(document.getElementById('recordDetailsModal'));
+    //                     modal.show();
+    //                 }
+    //             })
+    //             .catch((error) => {
+    //                 console.error('Error getting record details:', error);
+    //             });
+    //     }
+        
+    //     // Delete record
+    //     function deleteRecord(id) {
+    //         firebase.firestore().collection('graffitiData').doc(id)
+    //             .delete()
+    //             .then(async () => {
+    //                 alert('Record deleted successfully!');
+    //                 // Reload data
+    //                 $('#dataTable').DataTable().destroy();
+    //                 await loadData();
+    //             })
+    //             .catch((error) => {
+    //                 console.error('Error deleting record:', error);
+    //                 alert('Error deleting record: ' + error.message);
+    //             });
+    //     }
+        
+    //     // Export data to CSV
+    //     document.getElementById('exportCSV').addEventListener('click', async function() {
+    //         let querySnapshot = await db.collection('graffitiData').get();
+
+    //         if (querySnapshot.empty) {
+    //             alert('No data to export.');
+    //             return;
+    //         }
+                    
+    //         const headers = [
+    //         'Unique identifier', 'Pleiades ID & URL', 'Longitude', 'Latitude', 'TM identifier',
+    //         'TLA identifier', 'TLA stable URL', 'Land', 'Region', 'Area', 'Site conventional modern name',
+    //         'Site ancient name(s)', 'PM code', 'TopBib code', 'Building', 'Part of building', 'Landscape feature',
+    //         'Room/space', 'Wall', 'Scene', 'Plan', 'Material', 'Execution technique', 'Colour', 'Object type',
+    //         'State of preservation', 'Languages', 'Height above ground', 'Location 1 - primary scene placement',
+    //         'Location 2 - in relation to other graffiti', 'Type of feature', 'Type of inscription', 'Contents',
+    //         'Script type', 'Royal name(s)', 'Private name - writer/signature', 'Other private names', 'Name cross-references',
+    //         'Divine names', 'Title(s)', 'Date primary surface', 'Date secondary feature', 'References unpublished',
+    //         'Reference archive/unpublished URL', 'References published (with OEB codes)', 'Zotero link', 'Photograph',
+    //         'Drawing', 'Palaeography information', 'Research log', 'Scan', 'Text edition', 'Contributor', 'Timestamp latest modification'
+    //         ];
+
+    //     const rows = [];
+        
+    //     // Loop through each document and extract the fields in order
+    //     querySnapshot.forEach((doc) => {
+    //       const data = doc.data();
+    //       const row = [
+    //         data['Unique identifier'] || '',
+    //         data['Pleiades ID & URL'] || '',
+    //         data['Longitude'] || '',
+    //         data['Latitude'] || '',
+    //         data['TM identifier'] || '',
+    //         data['TLA identifier'] || '',
+    //         data['TLA stable URL'] || '',
+    //         data['Land'] || '',
+    //         data['Region'] || '',
+    //         data['Area'] || '',
+    //         data['Site conventional modern name'] || '',
+    //         data['Site ancient name(s)'] || '',
+    //         data['PM code'] || '',
+    //         data['TopBib code'] || '',
+    //         data['Building'] || '',
+    //         data['Part of building'] || '',
+    //         data['Landscape feature'] || '',
+    //         data['Room/space'] || '',
+    //         data['Wall'] || '',
+    //         data['Scene'] || '',
+    //         data['Plan'] || '',
+    //         data['Material'] || '',
+    //         data['Execution technique'] || '',
+    //         data['Colour'] || '',
+    //         data['Object type'] || '',
+    //         data['State of preservation'] || '',
+    //         data['Languages'] || '',
+    //         data['Height above ground'] || '',
+    //         data['Location 1 - primary scene placement'] || '',
+    //         data['Location 2 - in relation to other graffiti'] || '',
+    //         data['Type of feature'] || '',
+    //         data['Type of inscription'] || '',
+    //         data['Contents'] || '',
+    //         data['Script type'] || '',
+    //         data['Royal name(s)'] || '',
+    //         data['Private name - writer/signature'] || '',
+    //         data['Other private names'] || '',
+    //         data['Name cross-references'] || '',
+    //         data['Divine names'] || '',
+    //         data['Title(s)'] || '',
+    //         data['Date primary surface'] || '',
+    //         data['Date secondary feature'] || '',
+    //         data['References unpublished'] || '',
+    //         data['Reference archive/unpublished URL'] || '',
+    //         data['References published (with OEB codes)'] || '',
+    //         data['Zotero link'] || '',
+    //         data['Photograph'] || '',
+    //         data['Drawing'] || '',
+    //         data['Palaeography information'] || '',
+    //         data['Research log'] || '',
+    //         data['Scan'] || '',
+    //         data['Text edition'] || '',
+    //         data['Contributor'] || '',
+    //         data['Timestamp latest modification'] || ''
+    //       ];
+    //       rows.push(row);
+    //     });
+                    
+    //     // Create CSV content
+    //     const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n');
+        
+    //     // Create download link
+    //     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    //     const url = URL.createObjectURL(blob);
+    //     const a = document.createElement('a');
+    //     a.href = url;
+    //     a.download = 'archaeological_data_' + new Date().toISOString().split('T')[0] + '.csv';
+    //     document.body.appendChild(a);
+    //     a.click();
+    //     document.body.removeChild(a);
+    // });
+    </script>
+</body>
+</html>
