@@ -86,3 +86,40 @@
     font-size: 1.1rem;
     border-radius: 5px;
 }
+
+.search-input {
+    padding-left: 35px;
+    padding-right: 30px;
+    height: 40px;
+}
+
+.search-icon {
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    z-index: 10;
+}
+
+.clear-icon {
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.clear-icon:hover {
+    color: #dc3545;
+}
+
+/* For Firefox */
+input[type="search"]::-moz-search-cancel-button {
+    -moz-appearance: none;
+}
+
+/* For WebKit browsers like Chrome and Safari */
+input[type="search"]::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+}
