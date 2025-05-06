@@ -13,6 +13,11 @@
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
             integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 
+        <!-- Firebase -->
+        <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
         <!-- Custom CSS -->
         <link rel="stylesheet" href="css/style.css">
     </head>
@@ -39,9 +44,12 @@
                     <div class="card">
                         <div class="card-header bg-primary text-white">
                             <h5 class="mb-0">Search Filters
-                                <i class="bi bi-geo-alt-fill float-end" style="cursor: pointer;" data-bs-toggle="modal"
+                                <i id="showMainMap" class="bi bi-geo-alt-fill float-end" style="cursor: pointer;" data-bs-toggle="modal"
                                     data-bs-target="#mapModal"></i>
                             </h5>
+                        </div>
+                        <div class="card-footer text-body-secondary">
+                            <button id="resetFilters" class="btn btn-secondary w-100">Reset All Filters</button>
                         </div>
                         <div class="card-body" style="height: 75vh; overflow-x: auto;">
                             <!-- Where Filter -->
@@ -150,12 +158,8 @@
                                         placeholder="Search text content">
                                 </div>
                             </div>
-
-
                         </div>
-                        <div class="card-footer text-body-secondary">
-                            <button id="resetFilters" class="btn btn-secondary w-100">Reset All Filters</button>
-                        </div>
+
                     </div>
                 </div>
 
@@ -164,13 +168,47 @@
                     <div class="card">
                         <div
                             class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Results</h5>
-                            <span id="resultCount" class="badge bg-light text-dark">0 Results</span>
+                            <h5 class="mb-0">Results
+                                <span id="resultCount" class="badge bg-light text-dark ms-2">0 Results</span>
+                                <span id="spBigGraph" data-bs-toggle="modal" data-bs-target="#modalRDFGraph"
+                                    style="cursor: pointer;"><i class="bi bi-share-fill ms-2"></i> Visualise</span>
+                            </h5>
+                            <div class="w-25">
+                                <div class="dropdown float-end">
+                                    <a class="btn btn-secondary dropdown-toggle bg-light text-dark" href="#"
+                                        role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-download"></i> Download
+                                    </a>
+
+                                    <ul class="dropdown-menu">
+                                        <li><span class="dropdown-item downloadData" style="cursor: pointer;"><i
+                                                    class="bi bi-file-earmark-spreadsheet"></i> CSV</span></li>
+                                        <li><a class="dropdown-item downloadData" href="#"><i
+                                                    class="bi bi-file-earmark-text"></i> RDF</a></li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                         <div class="card-body">
+                            <div class="filter-section">
+                                <div class="position-relative">
+                                    <span class="position-absolute search-icon">
+                                        <i class="bi bi-search"></i>
+                                    </span>
+                                    <input type="text" autofocus="true" autocomplete="off"
+                                        class="form-control search-input" id="fullTextSearch"
+                                        placeholder="Search across all fields...">
+                                    <span class="position-absolute clear-icon" id="clearSearch" style="display: none;">
+                                        <i class="bi bi-x-circle"></i>
+                                    </span>
+                                </div>
+                            </div>
                             <div id="searchResults">
                                 <!-- Results will be populated here -->
                                 <div class="no-results">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
                                     <h4>Loading inscriptions...</h4>
                                     <p>Please wait while we fetch the data.</p>
                                 </div>
@@ -215,6 +253,37 @@
             </div>
         </div>
 
+        <!-- Modal RDF Graph -->
+        <div class="modal fade" id="modalRDFGraph" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+            aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable modal-fullscreen">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel"><i class="bi bi-bezier fs-3"></i>
+                            RDF Visualisation
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="divLoadingGraph">
+                            <div class="spinner-border text-primary m-auto" role="status">
+                                <span class="visually-hidden">Loading...</span> 
+                            </div> Loading Graph...
+                        </div>
+
+                        <div class="list-group" id="divGraph" style="width: auto;
+                     height: 100%;">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="outputRDF" class="d-none"></div>
+
         <!-- Bootstrap 5.3 JS and Popper.js -->
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
@@ -224,11 +293,19 @@
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
         <script src="js/csvParser.js"></script>
+
+        <script src="js/n3.min.js"></script>
+
+        <script src="js/comunica-browser.js"></script>
+
         <div id="divLoadJs"></div>
 
         <script>
             $('#divLoadJs').load('libraries.html');  
         </script>
+
+        <script src="js/vis.js"></script>
+
     </body>
 
 </html>
