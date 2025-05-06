@@ -398,7 +398,7 @@ $(document).ready(function () {
             // Create the heading by combining site, type, and date
             const site = item['Site conventional modern name'] || '#';
             const type = item['Type of inscription'] || '#';
-            let dateURL = item['Date secondary featureURL'] || item['Date primary surfaceURL'] || '#';
+            let dateURL = item['Date secondary featureURL'] || '';
             let scriptURL = item['Script typeURL'] || 'N/A';
             let languageURL = item.LanguagesURL || 'N/A';
             let materialURL = item.MaterialURL || '';
@@ -408,14 +408,14 @@ $(document).ready(function () {
 
             if (localStorage.getItem('storeItems')) {
                 let storeItems = JSON.parse(localStorage.getItem('storeItems'));
-                date = storeItems[`${item['Unique identifier']}`]['Date secondary feature'] || storeItems[`${item['Unique identifier']}`]['Date primary surface'];
+                date = storeItems[`${item['Unique identifier']}`]['Date secondary feature'] || ""; //|| storeItems[`${item['Unique identifier']}`]['Date primary surface'];
                 script = storeItems[`${item['Unique identifier']}`]['Script type'];
                 language = storeItems[`${item['Unique identifier']}`]['Languages'];
                 material = storeItems[`${item['Unique identifier']}`]['Material'];
                 execution = storeItems[`${item['Unique identifier']}`]['Execution technique'];
             }
 
-            const heading = `${site} - ${type} (${date})`;
+            const heading = date !== '' ? `${site} - ${type} (${date})` : `${site} - ${type}`;
 
             // Create result card
             const card = `
@@ -434,7 +434,7 @@ $(document).ready(function () {
                              </div>
                          <div class="col-md-6">
                              <p class="result-info">
-                                 <strong>Date:</strong> <a href="${dateURL}" target="_blank" style="text-decoration: none;">${date} <i class="bi bi-box-arrow-up-right"></i></a><br>
+                                ${dateURL !== '' ? `<strong>Date:</strong> <a href="${dateURL}" target="_blank" style="text-decoration: none;">${date} <i class="bi bi-box-arrow-up-right"></i></a><br>` : ``}
                                  <strong>Type:</strong> ${type}<br>
                                  <strong>Script:</strong> <a href="${scriptURL}" target="_blank" style="text-decoration: none;">${script} <i class="bi bi-box-arrow-up-right"></i></a><br>
                                  <strong>Language:</strong> <a href="${languageURL}" target="_blank" style="text-decoration: none;">${language} <i class="bi bi-box-arrow-up-right"></i></a>
@@ -557,7 +557,7 @@ $(document).ready(function () {
                  <h5>Dating</h5>
                  <table class="table table-bordered">
                      <tr><th>Primary Date</th><td><a href="${item['Date primary surfaceURL']}" target="_blank" style="text-decoration: none;">${item['Date primary surface'] || 'N/A'} <i class="bi bi-box-arrow-up-right"></i></a></td></tr>
-                     <tr><th>Secondary Date</th><td><a href="${item['Date secondary featureURL']}" target="_blank" style="text-decoration: none;">${item['Date secondary feature'] || 'N/A'} <i class="bi bi-box-arrow-up-right"></i></a></td></tr>
+                     <tr><th>Secondary Date</th><td>${item['Date secondary featureURL'] !== undefined ? `<a href="${item['Date secondary featureURL']}" target="_blank" style="text-decoration: none;">${item['Date secondary feature']} <i class="bi bi-box-arrow-up-right"></i></a>`: 'N/A'}</td></tr>
                  </table>
              </div>
              
