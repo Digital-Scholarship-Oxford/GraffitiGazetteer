@@ -128,7 +128,8 @@ $(document).ready(function () {
         if (localStorage.getItem('storeItems') === null || localStorage.getItem('storeItems') === undefined) {
             let storeItems = {};
             let isServiceUnavailable = false;
-            let resp = await fetch('../data/collections.json');
+            debugger;
+            let resp = await fetch('data/collections.json');
             let data = await resp.json();
 
             for (const item of inscriptionsData) {
