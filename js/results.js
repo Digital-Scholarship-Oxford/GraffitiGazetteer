@@ -180,17 +180,10 @@ $(document).ready(function () {
             }
         }
 
-        //debugger
-        convert2RDF(inscriptionsData);
-
-        // Populate filter options
-        populateFilterOptions();
-
-        // Display results initially
-        displayResults();
+        return inscriptionsData;
     }
 
-    $('#showMainMap').click(function(){
+    $('#showMainMap').click(function () {
         debugger;
         let setLat = inscriptionsData.filter(x => x.Latitude !== "" && x.Latitude !== undefined).map(x => x.Latitude)[0];
         let setLong = inscriptionsData.filter(x => x.Longitude !== "" && x.Longitude !== undefined).map(x => x.Longitude)[0];
@@ -204,8 +197,8 @@ $(document).ready(function () {
         }).addTo(map);
 
         let usedLatLng = []
-         // Add markers to the map
-         inscriptionsData.forEach(function (ins) {
+        // Add markers to the map
+        inscriptionsData.forEach(function (ins) {
             const site = ins['Site conventional modern name'] || 'Unknown Site';
             const type = ins['Type of inscription'] || 'Unknown Type';
             const date = ins['Date secondary feature'] || ins['Date primary surface'] || 'Unknown Date';
@@ -422,7 +415,7 @@ $(document).ready(function () {
              <div class="card result-card mb-3">
                  <div class="card-body">
                      <h5 class="card-title">
-                         <a href="#" class="result-title" data-id="${item['Unique identifier']}">${heading}</a>
+                         <a href="detail.html?id=${item['Unique identifier']}" target="_blank">${heading}</a>
                      </h5>
                      <div class="row">
                          <div class="col-md-6">
@@ -557,7 +550,7 @@ $(document).ready(function () {
                  <h5>Dating</h5>
                  <table class="table table-bordered">
                      <tr><th>Primary Date</th><td><a href="${item['Date primary surfaceURL']}" target="_blank" style="text-decoration: none;">${item['Date primary surface'] || 'N/A'} <i class="bi bi-box-arrow-up-right"></i></a></td></tr>
-                     <tr><th>Secondary Date</th><td>${item['Date secondary featureURL'] !== undefined ? `<a href="${item['Date secondary featureURL']}" target="_blank" style="text-decoration: none;">${item['Date secondary feature']} <i class="bi bi-box-arrow-up-right"></i></a>`: 'N/A'}</td></tr>
+                     <tr><th>Secondary Date</th><td>${item['Date secondary featureURL'] !== undefined ? `<a href="${item['Date secondary featureURL']}" target="_blank" style="text-decoration: none;">${item['Date secondary feature']} <i class="bi bi-box-arrow-up-right"></i></a>` : 'N/A'}</td></tr>
                  </table>
              </div>
              
@@ -1192,10 +1185,19 @@ $(document).ready(function () {
         initializeGraphicalView(true, sparqlResults);
     };
 
-    let interval = setInterval(() => {
+    let interval = setInterval(async () => {
         if (accessToken !== '') {
             clearInterval(interval);
-            loadData();
+            let inscriptionsData = await loadData();
+            
+            //debugger;
+            convert2RDF(inscriptionsData);
+
+            // Populate filter options
+            populateFilterOptions();
+
+            // Display results initially
+            displayResults();
         }
     }, 500);
 

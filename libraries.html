@@ -1,3 +1,24 @@
 <script src="js/ghConfig.js"></script>
 <script src="js/firebase.js"></script>
-<script src="js/results.js"></script>
+<!-- <script src="js/results.js"></script>
+<script src="js/detail.js"></script> -->
+
+<script>
+  // Get current page name
+  const page = window.location.pathname.split('/').pop();
+
+  // Conditionally load JS files based on the page
+  if (page === 'results.html') {
+    loadScript('js/results.js');
+  } else if (page === 'detail.html') {
+    loadScript('js/detail.js');
+  }
+
+  function loadScript(src) {
+    const script = document.createElement('script');
+    script.src = src;
+    script.defer = true; // optional: defer execution
+    document.head.appendChild(script);
+  }
+</script>
+

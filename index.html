@@ -6,16 +6,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Graffiti Gazetteer</title>
         <!-- Bootstrap 5.3 CSS -->
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
 
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-        <!-- Bootstrap 5.3 JS and Popper.js -->
-        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
-        <!-- jQuery -->
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
         <!-- Custom CSS -->
         <link rel="stylesheet" href="css/style.css">
@@ -23,17 +16,31 @@
 
     <body>
         <div class="container">
-            <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
-                <a href="index.html"
-                    class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
-                    <img src="images/logo.png" class="img-fluid bi me-2" width="20">
-                    <span class="fs-4">Graffiti Gazetteer</span>
-                </a>
+            <header class="d-flex flex-wrap justify-content-center py-3">
+                <!-- Navbar -->
+                <nav class="navbar navbar-expand-md border-bottom py-3 w-100">
+                    <div class="container-fluid">
+                        <a href="index.html" class="navbar-brand d-flex align-items-center">
+                            <img src="images/logo.png" class="img-fluid me-2" width="20" alt="Logo">
+                            <span class="fs-4 text-primary">Graffiti Gazetteer</span>
+                        </a>
 
-                <ul class="nav nav-pills">
-                    <li class="nav-item"><a href="index.html" class="nav-link active" aria-current="page">Home</a></li>
-                    <li class="nav-item"><a href="results.html" class="nav-link">Browse</a></li>
-                </ul>
+                        <!-- Toggler -->
+                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
+                            aria-label="Toggle navigation">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+
+                        <!-- Collapsible Menu -->
+                        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                            <ul class="navbar-nav text-primary">
+                                <li class="nav-item"><a class="nav-link active text-primary" href="index.html">Home</a></li>
+                                <li class="nav-item"><a class="nav-link text-primary" href="results.html">Browse</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </nav>
             </header>
 
             <!-- Hero Section -->
@@ -51,15 +58,38 @@
             <section id="about" class="py-5">
                 <div class="container text-center">
                     <h2>About the Gazetteer</h2>
-                    <p class="lead">The Graffiti Inscription Gazetteer is a digital archive dedicated to cataloguing and preserving the stories of graffiti inscriptions across Egypt. Explore locations, the stories behind the inscriptions, and the writers, visitors, and artists who created them. The Graffiti Gazetteer project builds a unique resource collecting data on the multilingual corpus of graffiti in Egypt. In a full version, it aims to include historical secondary inscriptions starting with ancient material but with potential to include visitors’ texts produced up until the 20th century. </p>
+                    <p class="lead">The Graffiti Inscription Gazetteer is a digital archive dedicated to cataloguing and
+                        preserving the stories of graffiti inscriptions across Egypt. Explore locations, the stories
+                        behind the inscriptions, and the writers, visitors, and artists who created them. The Graffiti
+                        Gazetteer project builds a unique resource collecting data on the multilingual corpus of
+                        graffiti in Egypt. In a full version, it aims to include historical secondary inscriptions
+                        starting with ancient material but with potential to include visitors’ texts produced up until
+                        the 20th century. </p>
                     <p>
-                        <b>Its first aim is the ancient graffiti.</b> Secondary epigraphy, or graffiti, are probably the most widespread media of the ancient world. Texts and figures added to varied surfaces and places could be produced by nearly everyone. Even though graffiti articulated individual and community concerns and religious and political views, they are underrated. This is a paradox, because studying graffiti enriches historical knowledge and challenges established narratives about past cultures.
+                        <b>Its first aim is the ancient graffiti.</b> Secondary epigraphy, or graffiti, are probably the
+                        most widespread media of the ancient world. Texts and figures added to varied surfaces and
+                        places could be produced by nearly everyone. Even though graffiti articulated individual and
+                        community concerns and religious and political views, they are underrated. This is a paradox,
+                        because studying graffiti enriches historical knowledge and challenges established narratives
+                        about past cultures.
                     </p>
                     <p>
-                        <b>Why a digital resource for graffiti in Egypt and in the Nile Valley?</b> - Short texts and images, some outwardly resembling modern ‘tags’ and others more like ‘street art’, appeared in the funerary environment, or on temple architecture, as well as in other anthropogenic locations like mines and quarries. These seemingly unprepossessing artefacts are in fact eloquent traces of past societies and cultures, allowing fragmentary insights into both elite and non-elite lives and the roles that monuments continued to play long after their original construction. The graffiti study has benefited from using concepts developed in anthropology, cultural history, literacy studies and cognitive archaeology, offering a rich interpretation.
+                        <b>Why a digital resource for graffiti in Egypt and in the Nile Valley?</b> - Short texts and
+                        images, some outwardly resembling modern ‘tags’ and others more like ‘street art’, appeared in
+                        the funerary environment, or on temple architecture, as well as in other anthropogenic locations
+                        like mines and quarries. These seemingly unprepossessing artefacts are in fact eloquent traces
+                        of past societies and cultures, allowing fragmentary insights into both elite and non-elite
+                        lives and the roles that monuments continued to play long after their original construction. The
+                        graffiti study has benefited from using concepts developed in anthropology, cultural history,
+                        literacy studies and cognitive archaeology, offering a rich interpretation.
                     </p>
                     <p>
-                        Empowering research by digital data accessibility has changed the research of graffiti, as it has been demonstrated by presentation of graffiti from single sites. Graffiti are a widespread, productive source, but require both a quantitative and qualitative study that situates each inscription in their environment, yet allows to view aggregated corpora in buildings, and across sites or regions, and across historical periods. Egypt offers a fascinating corpus of texts and images that provides insights including–and extending beyond–local or regional histories.
+                        Empowering research by digital data accessibility has changed the research of graffiti, as it
+                        has been demonstrated by presentation of graffiti from single sites. Graffiti are a widespread,
+                        productive source, but require both a quantitative and qualitative study that situates each
+                        inscription in their environment, yet allows to view aggregated corpora in buildings, and across
+                        sites or regions, and across historical periods. Egypt offers a fascinating corpus of texts and
+                        images that provides insights including–and extending beyond–local or regional histories.
                     </p>
                     <a href="results.html" class="btn btn-primary">Start Exploring</a>
                 </div>
@@ -78,18 +108,25 @@
             </section>
 
             <section class="mt-3">
-                <p><i>Please note that this is a work in progress and you are currently browsing a research infrastructure under construction. 
-                    The current collection contains only a small sample of data. 
-                    Visit also our growing image catalogue at 
-                    <a href="https://portal.sds.ox.ac.uk/Graffiti_Gazetteer" target="_blank">
-                        https://portal.sds.ox.ac.uk/Graffiti_Gazetteer
-                    </a>
-                </i></p>
+                <p><i>Please note that this is a work in progress and you are currently browsing a research
+                        infrastructure under construction.
+                        The current collection contains only a small sample of data.
+                        Visit also our growing image catalogue at
+                        <a href="https://portal.sds.ox.ac.uk/Graffiti_Gazetteer" target="_blank">
+                            https://portal.sds.ox.ac.uk/Graffiti_Gazetteer
+                        </a>
+                    </i></p>
             </section>
         </div>
 
+        <!-- jQuery -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
         <!-- Bootstrap 5.3 JS and Popper.js -->
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
+
+    </body>
 
 </html>
