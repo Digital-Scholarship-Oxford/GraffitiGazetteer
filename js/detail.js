@@ -397,8 +397,8 @@ if (location.href.indexOf('detail.html') > -1) {
 
             // Now draw offscreen canvas to visible canvas, scaling down
 
-            const maxWidth = 500;
-            const maxHeight = 400;
+            const maxWidth = 600;
+            const maxHeight = 500;
 
             // Calculate aspect ratio fit
             let targetWidth = maxWidth;
