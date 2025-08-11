@@ -134,7 +134,7 @@ if (location.href.indexOf('detail.html') > -1) {
                     loadSDSImages(sdsArticle);
                 }
                 else {
-                    //$('#sdsImages').html(item['Reference archive/unpublished URL']);
+                    $('#sdsImages').html(item['Reference archive/unpublished URL']);
                 }
             }
             else {
