@@ -47,7 +47,7 @@ if (location.href.indexOf('detail.html') > -1) {
                 <table class="table table-bordered">
                     <tr>
                         <th>Unique ID</th><td>${item['Unique identifier'] || 'N/A'}</td>
-                        <th>TM Identifier ${otherDatasets !==  '' ? '<br /><br /><strong>Other Dataset(s):</strong>' : ''}</th><td>${tmIdenfifier} ${otherDatasets}</td>
+                        <th>TM Identifier ${otherDatasets !== '' ? '<br /><br /><strong>Other Dataset(s):</strong>' : ''}</th><td>${tmIdenfifier} ${otherDatasets}</td>
                     </tr>
                     <tr>
                         <th>Pleiades ID</th><td>${pleiadesId}</td>
@@ -211,6 +211,7 @@ if (location.href.indexOf('detail.html') > -1) {
         try {
             const res = await fetch(url);
             jsonData = await res.json();
+            if(typeof jsonData === 'object') return '';
             if (jsonData.length > 0) {
                 const datasets = [];
                 const data = [];
