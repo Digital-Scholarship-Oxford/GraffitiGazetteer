@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <title>Dataset Connections</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                text-align: center;
+                background: #f7f7f7;
+            }
+
+            #canvas {
+                border: 1px solid #ccc;
+                background: white;
+                margin-top: 20px;
+            }
+
+            #network {
+                width: 100%;
+                height: 500px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                margin-top: 20px;
+                background-color: #fafafa;
+            }
+        </style>
+    </head>
+
+    <body>
+        <h2>TM Dataset Connections</h2>
+        <input type="text" id="tmid" placeholder="Enter TM ID">
+        <button onclick="fetchData()">Show Connections</button>
+
+        <canvas id="canvas" width="800" height="500"></canvas>
+
+        <div id="network"></div>
+
+
+        <script src="js/vis.js"></script>
+
+        <script>
+            async function fetchData() {
+                const tmid = document.getElementById("tmid").value;
+                if (!tmid) return alert("Please enter a TM ID");
+
+                // Example call to TexRelations API
+                // Replace with actual endpoint + parameters
+                const url = `https://www.trismegistos.org/dataservices/texrelations/${tmid}`;
+                let jsonData;
+                try {
+                    const res = await fetch(url);
+                    jsonData = await res.json();
+                } catch (e) {
+                    alert("Error fetching data");
+                    console.error(e);
+                    return;
+                }
+
+                if (jsonData.length > 0) {
+                    const datasets = [];
+                    const data = [];
+                    for (let i = 0; i < jsonData.length; i++) {
+                        for (const [key, value] of Object.entries(jsonData[i])) {
+                            if (key !== "TM_ID" && value !== null) {
+                                datasets.push(key);
+                                data.push({ dataset: key, id: value });// Store dataset and id
+                            }
+                        }
+                    }
+                    //drawConnections(`TM ID: ${tmid}`, datasets);
+                    visualizeNetwork(data, tmid);
+                }
+            }
+
+            function drawConnections(centerId, datasets) {
+                const canvas = document.getElementById("canvas");
+                const ctx = canvas.getContext("2d");
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                const centerX = canvas.width / 2;
+                const centerY = canvas.height / 2;
+
+                // Draw central node (TM ID)
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 40, 0, Math.PI * 2);
+                ctx.fillStyle = "#4CAF50";
+                ctx.fill();
+                ctx.stroke();
+                ctx.fillStyle = "#fff";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.font = "16px Arial";
+                ctx.fillText(centerId, centerX, centerY);
+
+                // Arrange dataset nodes in a circle around the TM node
+                const radius = 150;
+                const angleStep = (2 * Math.PI) / datasets.length;
+
+                datasets.forEach((ds, i) => {
+                    const angle = i * angleStep;
+                    const x = centerX + radius * Math.cos(angle);
+                    const y = centerY + radius * Math.sin(angle);
+
+                    // Draw line to center
+                    ctx.beginPath();
+                    ctx.moveTo(centerX, centerY);
+                    ctx.lineTo(x, y);
+                    ctx.strokeStyle = "#999";
+                    ctx.stroke();
+
+                    // Draw dataset node
+                    ctx.beginPath();
+                    ctx.arc(x, y, 30, 0, Math.PI * 2);
+                    ctx.fillStyle = "#2196F3";
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // Label dataset
+                    ctx.fillStyle = "#fff";
+                    ctx.fillText(ds, x, y);
+                });
+            }
+
+
+            // Cache colors so same dataset always gets same color
+            const colorCache = {};
+
+            // Generate a hash for a string (to ensure same input → same color)
+            function hashString(str) {
+                let hash = 0;
+                for (let i = 0; i < str.length; i++) {
+                    const char = str.charCodeAt(i);
+                    hash = ((hash << 5) - hash + char) & 0xFFFFFFFF; // Bitwise to keep it bounded
+                }
+                return Math.abs(hash);
+            }
+
+            // Generate a soft, pastel color from a string (dataset name)
+            function getRandomColor(dataset) {
+                if (colorCache[dataset]) return colorCache[dataset];
+
+                const hash = hashString(dataset);
+                // Use HSL for better control: random hue, soft saturation & lightness (pastel)
+                const hue = hash % 360;
+                const saturation = 65 + (hash % 20); // 65–85%
+                const lightness = 70 + (hash % 10);  // 70–80%
+
+                const color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+                colorCache[dataset] = color;
+                return color;
+            }
+
+            function visualizeNetwork(data, tmId) {
+                const nodes = [];
+                const edges = [];
+
+                // Central TM node
+                nodes.push({
+                    id: "TM",
+                    label: `TM ID: ${tmId}`,  // Line break for better fit
+                    shape: 'circle',
+                    size: 30,
+                    color: "#34495e",
+                    font: { color: "white", size: 16, face: "Arial", strokeWidth: 2, strokeColor: "#34495e" }
+                });
+
+                const seenDatasets = new Set();
+
+                data.forEach(item => {
+                    const ds = item.dataset || "Unknown";
+                    if (!ds || seenDatasets.has(ds)) return;
+                    seenDatasets.add(ds);
+
+                    const color = getRandomColor(ds);
+                    const id = item.id || "N/A";
+
+                    // Dynamic size based on label length
+                    const baseSize = 26;
+                    const size = Math.max(baseSize, ds.length * 6); // Wider for longer labels
+
+                    nodes.push({
+                        id: ds,
+                        label: ds,  // <-- This appears INSIDE the node
+                        shape: 'circle',
+                        size: size,
+                        color: color,
+                        font: {
+                            color: "white",
+                            size: 16,
+                            face: "Arial",
+                            strokeWidth: 3,        // Outline for better readability
+                            strokeColor: "rgba(0,0,0,0.2)"
+                        },
+                        title: `Dataset: ${ds}\nID: ${id}`
+                    });
+
+                    edges.push({
+                        from: "TM",
+                        to: ds,
+                        arrows: 'to',
+                        color: { color: "#bdc3c7", opacity: 0.6 },
+                        width: 1.5
+                    });
+                });
+
+                const container = document.getElementById("network");
+                const dataSet = { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) };
+                const options = {
+                    interaction: { hover: true, zoomView: true },
+                    layout: {
+                        hierarchical: { direction: "UD", sortMethod: "directed", nodeSpacing: 180 }
+                    },
+                    physics: {
+                        enabled: true,
+                        hierarchicalRepulsion: {
+                            centralGravity: 0.0,
+                            springLength: 240,
+                            springConstant: 0.035
+                        }
+                    },
+                    nodes: {
+                        shapeProperties: { useBorderWithImage: false }
+                    },
+                    edges: {
+                        smooth: true,
+                        color: "#95a5a6",
+                        width: 1.5
+                    }
+                };
+
+                new vis.Network(container, dataSet, options);
+            }
+        </script>
+    </body>
+
+</html>
