@@ -8,7 +8,7 @@ if (location.href.indexOf('detail.html') > -1) {
             if (inscriptionsData !== null && inscriptionsData !== undefined && inscriptionsData.length > 0) {
                 displayDetails();
             }
-            else{
+            else {
                 location.href = 'results.html';
             }
         }
@@ -29,6 +29,13 @@ if (location.href.indexOf('detail.html') > -1) {
 
             let pleiadesId = item['Pleiades ID & URL'] ? `<a href="${item['Pleiades ID & URL']}" target="_blank" style="text-decoration: none;">${item['Pleiades ID & URL'].split('/').pop()} <i class="bi bi-box-arrow-up-right"></i></a>` : 'N/A';
 
+            let otherDatasets = '';
+
+            if (item['TM identifier'] !== undefined && item['TM identifier'] !== null && item['TM identifier'] !== "") {
+                otherDatasets = await getOtherDatasetsByTMID(item['TM identifier']);
+            }
+
+            let tmIdenfifier = item['TM identifier'] ? `<a href="https://www.trismegistos.org/text/${item['TM identifier']}" target="_blank" style="text-decoration: none;">${item['TM identifier']} <i class="bi bi-box-arrow-up-right"></i></a>` : 'N/A';
             // Format the content for the modal
             let contentHtml = `${mapDetail}
          <h4>${item['Site conventional modern name']} - ${item['Type of inscription']}</h4>
@@ -40,7 +47,7 @@ if (location.href.indexOf('detail.html') > -1) {
                 <table class="table table-bordered">
                     <tr>
                         <th>Unique ID</th><td>${item['Unique identifier'] || 'N/A'}</td>
-                        <th>TM Identifier</th><td>${item['TM identifier'] || 'N/A'}</td>
+                        <th>TM Identifier ${otherDatasets !==  '' ? '<br /><br /><strong>Other Dataset(s):</strong>' : ''}</th><td>${tmIdenfifier} ${otherDatasets}</td>
                     </tr>
                     <tr>
                         <th>Pleiades ID</th><td>${pleiadesId}</td>
@@ -151,7 +158,7 @@ if (location.href.indexOf('detail.html') > -1) {
 
             L.marker([parseFloat(item.Latitude), parseFloat(item.Longitude)])
                 .addTo(m)
-                //.bindPopup('Hello');
+            //.bindPopup('Hello');
 
             // Show the modal
             const modal = new bootstrap.Modal(document.getElementById('detailModal'));
@@ -196,6 +203,39 @@ if (location.href.indexOf('detail.html') > -1) {
         }
 
         return null; // Not found
+    }
+
+    async function getOtherDatasetsByTMID(tmid) {
+        const url = `https://www.trismegistos.org/dataservices/texrelations/uri/${tmid}`;
+        let jsonData;
+        try {
+            const res = await fetch(url);
+            jsonData = await res.json();
+            if (jsonData.length > 0) {
+                const datasets = [];
+                const data = [];
+                let html = '<br /> <br /><ul>';
+                for (let i = 0; i < jsonData.length; i++) {
+                    for (const [key, value] of Object.entries(jsonData[i])) {
+                        if (key !== "TM_ID" && value !== null) {
+                            datasets.push(key);
+                            data.push({ dataset: key, id: value });// Store dataset and id
+                            html += `<li>${key}: <ul>`;
+                            for (let v of value) {
+                                html += `<li> <a href="${v}" target="_blank" style="text-decoration: none;">${v.split('/').pop()} <i class="bi bi-box-arrow-up-right"></i></a></li>`;
+                            }
+                            html += '</ul></li>';
+                        }
+                    }
+                }
+                html += '</ul>';
+                return html;
+                //visualizeNetwork(data, tmid);
+            }
+        } catch (e) {
+            console.error(e);
+            return;
+        }
     }
 
     async function getFileSHA(ref = 'main') {
