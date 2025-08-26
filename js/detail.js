@@ -211,28 +211,32 @@ if (location.href.indexOf('detail.html') > -1) {
         try {
             const res = await fetch(url);
             jsonData = await res.json();
-            if(typeof jsonData === 'object') return '';
-            if (jsonData.length > 0) {
-                const datasets = [];
-                const data = [];
-                let html = '<br /> <br /><ul>';
-                for (let i = 0; i < jsonData.length; i++) {
-                    for (const [key, value] of Object.entries(jsonData[i])) {
-                        if (key !== "TM_ID" && value !== null) {
-                            datasets.push(key);
-                            data.push({ dataset: key, id: value });// Store dataset and id
-                            html += `<li>${key}: <ul>`;
-                            for (let v of value) {
-                                html += `<li> <a href="${v}" target="_blank" style="text-decoration: none;">${v.split('/').pop()} <i class="bi bi-box-arrow-up-right"></i></a></li>`;
+            //if(typeof jsonData === 'object') return '';
+            if (Array.isArray(jsonData)) {
+                if (jsonData.length > 0) {
+                    const datasets = [];
+                    const data = [];
+                    let html = '<br /> <br /><ul>';
+                    for (let i = 0; i < jsonData.length; i++) {
+                        for (const [key, value] of Object.entries(jsonData[i])) {
+                            if (key !== "TM_ID" && value !== null) {
+                                datasets.push(key);
+                                data.push({ dataset: key, id: value });// Store dataset and id
+                                html += `<li>${key}: <ul>`;
+                                for (let v of value) {
+                                    html += `<li> <a href="${v}" target="_blank" style="text-decoration: none;">${v.split('/').pop()} <i class="bi bi-box-arrow-up-right"></i></a></li>`;
+                                }
+                                html += '</ul></li>';
                             }
-                            html += '</ul></li>';
                         }
                     }
+                    html += '</ul>';
+                    return html;
+                    //visualizeNetwork(data, tmid);
                 }
-                html += '</ul>';
-                return html;
-                //visualizeNetwork(data, tmid);
             }
+            return '';
+
         } catch (e) {
             console.error(e);
             return;
