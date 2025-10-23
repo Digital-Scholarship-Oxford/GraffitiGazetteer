@@ -1133,7 +1133,7 @@ $(document).ready(function () {
         // });
         network.once('stabilizationIterationsDone', function () {
             $('#divLoadingGraph').hide();
-            network.fit(); // Optionally zoom to fit
+            network.fit(); // Optionally zoom to fitz
         });
     }
 

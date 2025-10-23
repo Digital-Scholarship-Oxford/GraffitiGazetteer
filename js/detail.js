@@ -346,7 +346,7 @@ if (location.href.indexOf('detail.html') > -1) {
         const author = sdsArticle.authors?.[0]?.full_name || 'N/A';
         const funding = sdsArticle.funding || 'Not available';
         let tags = '';
-        sdsArticle.tags.forEach(tag => {
+        sdsArticle.keywords.forEach(tag => {
             const span = `<span class="badge bg-secondary me-1">${tag}</span>`;
             tags += span;
         });
