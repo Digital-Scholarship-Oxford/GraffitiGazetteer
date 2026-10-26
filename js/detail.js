@@ -498,7 +498,7 @@ if (location.href.indexOf('detail.html') > -1) {
             document.getElementById('carouselIndicators').appendChild(indicator);
 
             // Render the TIFF to the canvas
-            await renderTIFFtoCanvas(url, canvas);
+            await renderTIFFtoCanvas(sdsArticle.files[i].download_url, canvas);
         }
     }
 }
