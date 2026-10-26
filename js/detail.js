@@ -471,7 +471,7 @@ if (location.href.indexOf('detail.html') > -1) {
     async function setupCarousel(sdsArticle) {
         const carouselInner = document.getElementById('carouselInner');
         for (let i = 0; i < sdsArticle.files.length; i++) {
-            const url = 'https://proxy.cors.dev/' + encodeURIComponent(sdsArticle.files[i].download_url);
+            const url = 'https://proxy.cors.dev/' + encodeURIComponent('https://api.figshare.com/v2/file/download/56531579');
 
             // Create carousel item div
             const itemDiv = document.createElement('div');
@@ -498,7 +498,7 @@ if (location.href.indexOf('detail.html') > -1) {
             document.getElementById('carouselIndicators').appendChild(indicator);
 
             // Render the TIFF to the canvas
-            await renderTIFFtoCanvas(sdsArticle.files[i].download_url, canvas);
+            await renderTIFFtoCanvas(url, canvas);
         }
     }
 }
