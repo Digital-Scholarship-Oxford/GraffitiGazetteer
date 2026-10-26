@@ -135,7 +135,7 @@ if (location.href.indexOf('detail.html') > -1) {
                 if (item['Reference archive/unpublished URL'].includes('oxford.')) {
                     //$('#sdsImages').load(`https://www.doi.org/10.25446/oxford.29637701`)
                     let articleId = item['Reference archive/unpublished URL'].split('.').pop();
-                    let sdsResp = await fetch('https://corsproxy.io/?' + encodeURIComponent(`https://api.figshare.com/v2/articles/${articleId}`));
+                    let sdsResp = await fetch('https://proxy.cors.dev/' + encodeURIComponent(`https://api.figshare.com/v2/articles/${articleId}`));
                     let sdsArticle = await sdsResp.json();
                     console.log(sdsArticle);
                     loadSDSImages(sdsArticle);
@@ -471,7 +471,7 @@ if (location.href.indexOf('detail.html') > -1) {
     async function setupCarousel(sdsArticle) {
         const carouselInner = document.getElementById('carouselInner');
         for (let i = 0; i < sdsArticle.files.length; i++) {
-            const url = 'https://corsproxy.io/?' + encodeURIComponent(sdsArticle.files[i].download_url);
+            const url = 'https://proxy.cors.dev/' + encodeURIComponent(sdsArticle.files[i].download_url);
 
             // Create carousel item div
             const itemDiv = document.createElement('div');
