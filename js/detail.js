@@ -135,7 +135,8 @@ if (location.href.indexOf('detail.html') > -1) {
                 if (item['Reference archive/unpublished URL'].includes('oxford.')) {
                     //$('#sdsImages').load(`https://www.doi.org/10.25446/oxford.29637701`)
                     let articleId = item['Reference archive/unpublished URL'].split('.').pop();
-                    let sdsResp = await fetch('https://proxy.cors.dev/' + encodeURIComponent(`https://api.figshare.com/v2/articles/${articleId}`));
+                    let sdsResp = await fetch(`https://api.figshare.com/v2/articles/${articleId}`);
+                    // let sdsResp = await fetch('https://proxy.cors.dev/' + encodeURIComponent(`https://api.figshare.com/v2/articles/${articleId}`));
                     let sdsArticle = await sdsResp.json();
                     console.log(sdsArticle);
                     loadSDSImages(sdsArticle);
@@ -470,35 +471,45 @@ if (location.href.indexOf('detail.html') > -1) {
 
     async function setupCarousel(sdsArticle) {
         const carouselInner = document.getElementById('carouselInner');
-        for (let i = 0; i < sdsArticle.files.length; i++) {
-            const url = 'https://proxy.cors.dev/' + encodeURIComponent('https://api.figshare.com/v2/file/download/56531579');
+        const indicators = document.getElementById('carouselIndicators');
 
-            // Create carousel item div
+        carouselInner.innerHTML = '';
+        indicators.innerHTML = '';
+
+        for (let i = 0; i < sdsArticle.files.length; i++) {
+            const file = sdsArticle.files[i];
+
             const itemDiv = document.createElement('div');
             itemDiv.classList.add('carousel-item');
-            if (i === 0) itemDiv.classList.add('active'); // Activate first slide
 
-            // Create canvas inside the item
-            const canvas = document.createElement('canvas');
-            itemDiv.appendChild(canvas);
+            if (i === 0) {
+                itemDiv.classList.add('active');
+            }
 
-            // Append to carousel inner container
+            // Use an image element for the preview.
+            const img = document.createElement('img');
+            img.src = `https://s3-eu-west-1.amazonaws.com/ppreviews-oxford-5644276415/${file.id}/thumb.png`;
+            img.alt = file.name;
+            img.classList.add('d-block', 'w-100');
+
+            itemDiv.appendChild(img);
             carouselInner.appendChild(itemDiv);
 
-            // Create carousel indicator
             const indicator = document.createElement('button');
             indicator.type = 'button';
-            indicator.setAttribute('data-bs-target', '#carouselExampleIndicators');
-            indicator.setAttribute('data-bs-slide-to', i.toString());
+            indicator.setAttribute(
+                'data-bs-target',
+                '#carouselExampleIndicators'
+            );
+            indicator.setAttribute('data-bs-slide-to', String(i));
+            indicator.setAttribute('aria-label', `Slide ${i + 1}`);
+
             if (i === 0) {
                 indicator.classList.add('active');
                 indicator.setAttribute('aria-current', 'true');
             }
-            indicator.setAttribute('aria-label', `Slide ${i + 1}`);
-            document.getElementById('carouselIndicators').appendChild(indicator);
 
-            // Render the TIFF to the canvas
-            await renderTIFFtoCanvas(url, canvas);
+            indicators.appendChild(indicator);
         }
     }
 }
